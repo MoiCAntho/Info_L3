@@ -76,24 +76,32 @@ def P_sat(T) :
 def P_e(r,P) :
     return (r*P)/((M_eau/M_air)+r)
 
-def mat_P_sat(v_x,v_z) :
-    mat = np.zeros((v_x.shape[0],v_x.shape[0]))
-    for i in range(v_x.shape[0]) :
-        for j in range(v_z.shape[0]):
-            mat[i,j] = P_sat(Temp(enthalpie(v_x[i,j],v_z[i,j],v_x.shape[0]-j-1)))
+def mat_P_sat(v_1,v_2) :
+    mat = np.zeros((v_1.shape[0],v_1.shape[0]))
+    for i in range(v_1.shape[0]) :
+        for j in range(v_2.shape[0]):
+            mat[i,j] = P_sat(Temp(enthalpie(v_1[i,j],v_2[i,j],v_1.shape[0]-j-1)))
     return mat
     
-def mat_P_e(r,v_x,v_z) :
-    mat = np.zeros((v_x.shape[0],v_x.shape[0]))
-    for i in range(v_x.shape[0]) :
-        for j in range(v_x.shape[0]) :
-            mat[i,j] = P_e(r,Pr(Temp(enthalpie(v_x[i,j],v_z[i,j],v_x.shape[0]-j-1))))
+def mat_P_e(r,v_1,v_2) :
+    mat = np.zeros((v_1.shape[0],v_1.shape[0]))
+    for i in range(v_1.shape[0]) :
+        for j in range(v_1.shape[0]) :
+            mat[i,j] = P_e(r,Pr(Temp(enthalpie(v_1[i,j],v_2[i,j],v_1.shape[0]-j-1))))
     return mat
 
-def pititnuage(r,v_x,v_z) :
-    mat_partielle = mat_P_e(r,v_x,v_z)
-    mat_saturante = mat_P_sat(v_x,v_z)
+def pititnuage(r,v_1,v_2) :
+    mat_partielle = mat_P_e(r,v_1,v_2)
+    mat_saturante = mat_P_sat(v_1,v_2)
     return mat_partielle > mat_saturante
+
+##Programme de simulation ##
+
+# def initialisation :
+#     return None
+
+# def sim :
+#     pass
 
 ## Fonctions d'affichage ##
 
@@ -105,12 +113,17 @@ def ec_mont(ecran, montagne):
     return ecran
 
 def ecran(dim,montagne,cd_nuage): #Fonction qui créée une matrice pour l'affichage
-    ecran = np.zeros((dim,dim))
+    ecran = np.zeros((dim-2,dim-2))
     ec_mont(ecran, montagne)
-    for  i in range(dim):
-        for j in range(dim):
+    for  i in range(dim-2):
+        a=dim-1-i
+        for j in range(dim-2):
             if cd_nuage[i][j] == True :
                 ecran[i][j] = 2
+            if cd_nuage[i][j] == False :
+                ecran[i][j] = 1
+            if a < montagne.subs("x",j) :
+                    ecran[i][j] = 0
     return ecran
 
 def affiche_matrice(ecran):
@@ -122,6 +135,8 @@ def affiche_matrice(ecran):
     ecran=plt.imshow(couleurs)
     ecran=plt.axis('off')
     return ecran
+
+
 
 
 ## Param√®tres modifiables par l'utilisateur ##
@@ -140,4 +155,5 @@ v_2 = v_z(mat_courant)
 mP_e = mat_P_e(r, v_1, v_2)
 mP_sat = mat_P_sat(v_1, v_2)
 cd = pititnuage(r,v_1,v_2)
-ecran(dim, montagne, cd)
+mat_ecran = ecran(dim, montagne, cd)
+print("fin")
