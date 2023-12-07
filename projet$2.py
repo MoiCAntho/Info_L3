@@ -35,11 +35,12 @@ def laplacien_relax(matrice, montagne):
         for i in range(1, dim - 1):
             a=dim-1-i
             for j in range(1, dim - 1):
-                    if a<=montagne.subs(x, j):
-                        if i<= dim//2:
-                            matrice[a,j] = 0
-                    else:
-                        matrice[i,j] = 1/4 * (matrice[i - 1,j] + matrice[i + 1,j] + matrice[i,j - 1] + matrice[i,j + 1]-4*matrice[i,j])
+                h = (dim-1)/i
+                if a<=montagne.subs(x, j):
+                    if i<= dim//2:
+                        matrice[a,j] = 0
+                else:
+                    matrice[i,j] = 1/(h**2) * (matrice[i - 1,j] + matrice[i + 1,j] + matrice[i,j - 1] + matrice[i,j + 1]-4*matrice[i,j])
     matrice[j+1]=0
     return matrice
 
