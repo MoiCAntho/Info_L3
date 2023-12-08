@@ -35,12 +35,11 @@ def laplacien_relax(matrice, montagne):
         for i in range(1, dim - 1):
             a=dim-1-i
             for j in range(1, dim - 1):
-                h = (dim-1)/i
                 if a<=montagne.subs(x, j):
                     if i<= dim//2:
-                        matrice[a,j] = 0
+                        matrice[a,dim-1-j] = 0
                 else:
-                    matrice[i,j] = 1/(h**2) * (matrice[i - 1,j] + matrice[i + 1,j] + matrice[i,j - 1] + matrice[i,j + 1]-4*matrice[i,j])
+                    matrice[a,j] = (1/4) * (matrice[a + 1,j] + matrice[a - 1,j] + matrice[a,j + 1] + matrice[a,j - 1])
     matrice[j+1]=0
     return matrice
 
@@ -66,6 +65,7 @@ def enthalpie(v_1,v_2,z) :
     return B-((v_1**2+v_2**2)/2+g*z)
 
 def Temp(h) :
+    print(h)
     return ((h*M_air)/R)*2/7
 
 def Pr(T) :
@@ -76,6 +76,13 @@ def P_sat(T) :
 
 def P_e(r,P) :
     return (r*P)/((M_eau/M_air)+r)
+
+def mat_enthalp(v_1,v_2):
+    mat = np.zeros((v_1.shape[0],v_1.shape[0]))
+    for i in range(v_1.shape[0]):
+        for j in range(v_1.shape[0]):
+            mat[i,j] = enthalpie(v_1[i,j], v_2[i,j], v_1.shape[0]-1-j)
+    return mat
 
 def mat_P_sat(v_1,v_2) :
     mat = np.zeros((v_1.shape[0],v_1.shape[0]))
@@ -153,8 +160,5 @@ mat_courant = courant_init(v,dim)
 mat_courant = laplacien_relax(mat_courant, montagne)
 v_1 = v_x(mat_courant)
 v_2 = v_z(mat_courant)
-mP_e = mat_P_e(r, v_1, v_2)
-mP_sat = mat_P_sat(v_1, v_2)
-cd = pititnuage(r,v_1,v_2)
-mat_ecran = ecran(dim, montagne, cd)
+ent = mat_enthalp(v_1, v_2)
 print("fin")
